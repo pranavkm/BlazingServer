@@ -1,8 +1,7 @@
 ﻿@page "/"
-@inject HttpClient HttpClient
 @inject OrderState OrderState
-@inject IUriHelper UriHelper
 @inject IJSRuntime JS
+@inject SpecialsService Specials
 
 <div class="main">
     <ul class="pizza-cards">
@@ -10,7 +9,8 @@
         {
             @foreach (var special in specials)
             {
-                <li @onclick="@(() => OrderState.ShowConfigurePizzaDialog(special))" style="background-image: url('@special.ImageUrl')">
+                var id = $"pizza{special.Id}";
+                <li id="@id" @onclick="@(() => OrderState.ShowConfigurePizzaDialog(special))" style="background-image: url('@special.ImageUrl')">
                     <div class="pizza-info">
                         <span class="title">@special.Name</span>
                         @special.Description
@@ -22,7 +22,7 @@
     </ul>
 </div>
 
-<div class="sidebar">
+<div class="sidebar" id="pizzaOrders" pizzaCount="@Order.Pizzas.Count">
     @if (Order.Pizzas.Any())
     {
         <div class="order-contents">
@@ -56,12 +56,12 @@
 </TemplatedDialog>
 
 @functions {
-    List<PizzaSpecial> specials;
+    IList<PizzaSpecial> specials;
     Order Order => OrderState.Order;
 
-    protected async override Task OnInitAsync()
+    protected override void OnInitialized()
     {
-        specials = await HttpClient.GetJsonAsync<List<PizzaSpecial>>("specials");
+        specials = Specials.GetSpecials();
     }
 
     async Task RemovePizza(Pizza configuredPizza)

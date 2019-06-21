@@ -1,0 +1,67 @@
+@page "/checkout"
+@inject OrderState OrderState
+@inject HttpClient HttpClient
+@inject NavigationManager UriHelper
+@inject IJSRuntime JSRuntime
+@inject OrderService OrderService
+
+<div class="main">
+    <EditForm Model="@OrderState.Order.DeliveryAddress" OnValidSubmit="@PlaceOrder">
+        <div class="checkout-cols">
+            <div class="checkout-order-details">
+                <h4>Review order</h4>
+                <OrderReview Order="@OrderState.Order" />
+            </div>
+
+            <div class="checkout-delivery-address">
+                <h4>Deliver to...</h4>
+                <AddressEditor Address="@OrderState.Order.DeliveryAddress" />
+            </div>
+        </div>
+
+        <button type="submit" class="checkout-button btn btn-warning" disabled="@isSubmitting">
+            Place order
+        </button>
+
+        <DataAnnotationsValidator />
+    </EditForm>
+</div>
+
+@functions {
+    bool isSubmitting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Try to recover any temporary saved order
+        if (!OrderState.Order.Pizzas.Any())
+        {
+            var savedOrder = await LocalStorage.GetAsync<Order>(JSRuntime, "currentorder");
+            if (savedOrder != null)
+            {
+                OrderState.ReplaceOrder(savedOrder);
+                await LocalStorage.DeleteAsync(JSRuntime, "currentorder");
+            }
+            else
+            {
+                // There's nothing check out - go to home
+                UriHelper.NavigateTo("");
+            }
+        }
+    }
+
+    async Task PlaceOrder()
+    {
+        isSubmitting = true;
+
+        try
+        {
+            var newOrderId = await OrderService.PlaceOrder(OrderState.Order);
+            OrderState.ResetOrder();
+            UriHelper.NavigateTo($"myorders/{newOrderId}");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

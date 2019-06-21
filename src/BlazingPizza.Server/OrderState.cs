@@ -1,9 +1,17 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
-namespace BlazingPizza.Client
+namespace BlazingPizza.Server
 {
     public class OrderState
     {
+        private readonly ILogger<OrderState> logger;
+
+        public OrderState(ILogger<OrderState> logger)
+        {
+            this.logger = logger;
+        }
+
         public bool ShowingConfigureDialog { get; private set; }
 
         public Pizza ConfiguringPizza { get; private set; }
@@ -12,6 +20,8 @@ namespace BlazingPizza.Client
 
         public void ShowConfigurePizzaDialog(PizzaSpecial special)
         {
+            logger.LogInformation($"Configuring pizza {special.Id}");
+
             ConfiguringPizza = new Pizza()
             {
                 Special = special,
@@ -32,6 +42,8 @@ namespace BlazingPizza.Client
 
         public void ConfirmConfigurePizzaDialog()
         {
+            logger.LogInformation($"Adding pizza {ConfiguringPizza.SpecialId}");
+
             Order.Pizzas.Add(ConfiguringPizza);
             ConfiguringPizza = null;
 

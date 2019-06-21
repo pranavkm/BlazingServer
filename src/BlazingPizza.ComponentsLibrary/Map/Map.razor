@@ -6,10 +6,10 @@
 @functions {
     string elementId = $"map-{Guid.NewGuid().ToString("D")}";
     
-    [Parameter] double Zoom { get; set; }
-    [Parameter] List<Marker> Markers { get; set; }
+    [Parameter] public double Zoom { get; set; }
+    [Parameter] public List<Marker> Markers { get; set; }
 
-    protected async override Task OnAfterRenderAsync()
+    protected async override Task OnAfterRenderAsync(bool initial)
     {
         await JSRuntime.InvokeAsync<object>(
             "deliveryMap.showOrUpdate",

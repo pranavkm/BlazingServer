@@ -9,7 +9,7 @@
 
         public string Name { get; set; }
 
-        public decimal BasePrice { get; set; }
+        public int BasePrice { get; set; }
 
         public string Description { get; set; }
 

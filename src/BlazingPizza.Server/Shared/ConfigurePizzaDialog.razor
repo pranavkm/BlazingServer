@@ -1,4 +1,4 @@
-﻿@inject HttpClient HttpClient
+﻿@inject ToppingsService ToppingsService
 
 <div class="dialog-title">
     <h2>@Pizza.Special.Name</h2>
@@ -26,7 +26,7 @@
         }
         else
         {
-            <select class="custom-select" @onchange="@ToppingSelected">
+            <select id="custom-select" class="custom-select" @onchange="@ToppingSelected">
                 <option value="-1" disabled selected>(select)</option>
                 @for (var i = 0; i < toppings.Count; i++)
                 {
@@ -49,26 +49,26 @@
 </form>
 
 <div class="dialog-buttons">
-    <button class="btn btn-secondary mr-auto" @onclick="@OnCancel">Cancel</button>
+    <button class="btn btn-secondary mr-auto" @onclick="@OnCancel" id="cancel">Cancel</button>
     <span class="mr-center">
         Price: <span class="price">@(Pizza.GetFormattedTotalPrice())</span>
     </span>
-    <button class="btn btn-success ml-auto" @onclick="@OnConfirm">Order ></button>
+    <button class="btn btn-success ml-auto" @onclick="@OnConfirm" id="confirm">Order ></button>
 </div>
 
 @functions {
-    List<Topping> toppings;
+    IList<Topping> toppings;
 
-    [Parameter] Pizza Pizza { get; set; }
-    [Parameter] EventCallback OnCancel { get; set; }
-    [Parameter] EventCallback OnConfirm { get; set; }
+    [Parameter] public Pizza Pizza { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
 
-    protected async override Task OnInitAsync()
+    protected override void OnInitialized()
     {
-        toppings = await HttpClient.GetJsonAsync<List<Topping>>("toppings");
+        toppings = ToppingsService.GetToppings();
     }
 
-    void ToppingSelected(UIChangeEventArgs e)
+    void ToppingSelected(ChangeEventArgs e)
     {
         if (int.TryParse((string)e.Value, out var index) && index >= 0)
         {
